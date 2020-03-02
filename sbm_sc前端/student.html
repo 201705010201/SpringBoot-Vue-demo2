@@ -1,0 +1,149 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <script src="https://cdn.staticfile.org/vue/2.4.2/vue.min.js"></script>
+    <script src="https://cdn.staticfile.org/vue-resource/1.5.1/vue-resource.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.staticfile.org/twitter-bootstrap/4.1.0/css/bootstrap.min.css">
+    <title></title>
+</head>
+
+<body>
+    <div id="app" class="container">
+        <table class="table table-bordered table-striped text-center" style="margin-top:20px;">
+            <thead>
+                <tr>
+                    <th>学号</th>
+                    <th>姓名</th>
+                    <th>性别</th>
+                    <th>年龄</th>
+                    <th>学院</th>
+                    <th colspan="2">操作</th>
+                </tr>
+            </thead>
+            <tr>
+                <td><input v-bind:readOnly="isedit" type="text" v-model="rowtp.sno" class="form-control" placeholder="">
+                </td>
+                <td><input type="text" v-model="rowtp.sname" class="form-control" placeholder=""></td>
+                <td><input type="text" v-model="rowtp.ssex" class="form-control" placeholder=""></td>
+                <td><input type="text" v-model="rowtp.sage" class="form-control" placeholder=""></td>
+                <td><input type="text" v-model="rowtp.sdept" class="form-control" placeholder=""></td>
+                <td><button type="button" class="btn btn-primary" v-on:click="Save">保存</button></td>
+                <td><button type="button" class="btn btn-primary" v-on:click="Clear">放弃</button></td>
+            </tr>
+            <tr v-for="(row,index) in students">
+
+                <td>{{ row.sno}}</td>
+                <td>{{ row.sname}}</td>
+                <td>{{ row.ssex}}</td>
+                <td>{{ row.sage}}</td>
+                <td>{{ row.sdept}}</td>
+                <td><a href="#" v-on:click="Edit(row)">编辑</a> </td>
+                <td><a href="#" v-on:click="Delete(index)">删除</a> </td>
+            </tr>
+
+        </table>
+
+    </div>
+
+    <script>
+        new Vue({
+            el: "#app",
+            data: {
+                students: [],
+                rowtp: { sno: '', sname: '', ssex: '', sage: '', sdept: '' },
+                isedit: false
+            },
+            mounted: function () {
+                //发送get请求
+                this.$http.get('http://localhost:8080/sc/students').then(function (res) {
+                    this.students = res.body;
+                }, function () {
+                    alert('请求失败');
+                });
+            },
+            methods: {
+                Save: function () {
+                    if (this.rowtp.sno == '' || this.rowtp.sname == '' || this.rowtp.ssex == '' || this.rowtp.sage == '' || this.rowtp.sdept == '') {
+                        alert("学号、姓名等不能为空!");
+                        return;
+                    }
+
+                    var temp = this.rowtp;
+
+                    //var ejson = JSON.stringify(temp);
+
+                    if (this.isedit == false) {
+                        //增加数据库
+                        //Vue.http.options.emulateJSON = true;  //  全局启用emulateJSON 选项
+                        this.$http.post('http://localhost:8080/sc/student',JSON.stringify(temp)).then(function (res) {
+                            //console.log(res);
+                            if (res.body.rows > 0) {
+                                this.students.push(temp);
+                            }
+                        }, function (res) {
+                            // 这里是处理错误的回调
+                            //console.log(res)
+                        });
+
+                    } else {
+                        //修改数据库
+                        this.$http.put('http://localhost:8080/sc/student',JSON.stringify(temp)).then(function (res) {
+                            //console.log(res);
+                            if (res.body.rows > 0) {
+                                for (var i = 0; i < this.students.length; i++) {
+                                    if (this.students[i].sno == temp.sno) {
+                                        this.students[i].sname = temp.sname;
+                                        this.students[i].ssex = temp.ssex;
+                                        this.students[i].sage = temp.sage;
+                                        this.students[i].sdept = temp.sdept;
+                                        break;
+                                    }
+                                };
+                            }
+                        }, function (res) {
+                            // 这里是处理错误的回调
+                            console.log(res)
+                        });
+
+                    }
+                    //还原模板
+                    this.Clear();
+                    this.isedit = false;
+                },
+                Delete: function (index) {
+                    //数据库操作
+
+                    this.$http.delete('http://localhost:8080/sc/student/' + this.students[index].sno ).then(function (res) {
+                        if (res.body.rows > 0) {
+                            this.students.splice(index, 1);//从下标i开始删除1个元素：删除下标为i的元素
+                            this.Clear();
+                        }
+                    }, function (res) {
+                        // 这里是处理错误的回调
+                        console.log(res)
+                    });
+                },
+                Edit: function (row) {
+                    this.rowtp.sno = row.sno;
+                    this.rowtp.sname = row.sname;
+                    this.rowtp.ssex = row.ssex;
+                    this.rowtp.sage = row.sage;
+                    this.rowtp.sdept = row.sdept;
+
+                    this.isedit = true;
+                },
+                Clear: function () {
+                    this.rowtp = { sno: '', sname: '', ssex: '', sage: '', sdept: '' };
+                    this.isedit = false;
+                }
+
+            }
+        });
+       
+    </script>
+</body>
+
+</html>

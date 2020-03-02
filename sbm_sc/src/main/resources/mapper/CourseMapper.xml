@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xm.mapper.CourseMapper">
+
+    <!-- 根据课程号查询课程 -->
+    <select id="getById" parameterType="String" resultType="Course">
+        select * from course where cno=#{cno}
+    </select>
+
+    <!-- 查询所有课程 -->
+    <select id="list"  resultType="Course">
+        select * from course
+    </select>
+    
+    <!-- 查询所有学生成绩 -->
+<!--    <select id="grade"  resultType="map">-->
+<!--        select sname,cname,grade from sc,course,student where sc.sno=student.sno and sc.cno=course.cno order by sname-->
+<!--    </select>-->
+    
+    <!-- 插入一门课程 -->
+    <insert id="insert" parameterType="Course">
+        insert into course(cno,cname,cpno,ccredit) values(#{cno},#{cname},#{cpno},#{ccredit})
+    </insert>
+
+    <!-- 根据课程号修改课程信息 -->
+    <update id="update" parameterType="Course" >
+        update course set cname=#{cname},cpno=#{cpno},ccredit=#{ccredit} where cno=#{cno}
+    </update>
+
+    <!-- 根据课程号删除课程 -->
+    <delete id="delete" parameterType="String" >
+        delete  from course where cno=#{cno}
+    </delete>
+</mapper>

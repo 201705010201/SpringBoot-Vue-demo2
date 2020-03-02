@@ -1,0 +1,87 @@
+create database mis;
+
+use mis;
+
+drop table student;
+drop table course;
+drop table sc;
+
+create  table  student (
+	sno  char(12)  not null ,
+	sname  varchar(20) ,
+	ssex  char(3) ,
+	sage  int,
+	sdept  varchar(20) ,
+	primary  key(sno)  
+);
+
+
+insert into student(sno, sname, ssex, sage, sdept)
+ values('200215121', '李勇', '男',20,'cs');
+
+insert into student(sno, sname, ssex, sage, sdept)
+ values('200215122', '刘晨', '女',19,'cs');
+
+insert into student(sno, sname, ssex, sage, sdept)
+ values('200215123', '王敏', '女',18,'ma');
+
+insert into student(sno, sname, ssex, sage, sdept)
+ values('200215125', '张立', '男',19,'is');
+
+create  table course (
+	cno varchar(6) not null ,
+	cname varchar(20) not null ,
+	cpno varchar(6) ,
+	ccredit int ,
+	primary  key (cno) 
+    );
+
+insert into course(cno, cname, cpno ,ccredit)
+ values('1', '数据库','5',4);
+
+insert into course(cno, cname, cpno ,ccredit)
+ values('2', '数学',null,2);
+
+insert into course(cno, cname, cpno ,ccredit)
+ values('3', '信息系统','1',4);
+
+insert into course(cno, cname, cpno ,ccredit)
+ values('4', '操作系统','6',3);
+
+insert into course(cno, cname, cpno ,ccredit)
+ values('5', '数据结构','7',4);
+
+insert intocourse(cno, cname, cpno ,ccredit)
+ values('6', '数据处理',null,2);
+
+insert into course(cno, cname, cpno ,ccredit)
+ values('7', 'PASCAL语言','6',4);
+
+create table sc (
+	sno char(12)  not null ,
+	cno varchar(6) not null ,
+	grade int,
+	PRIMARY KEY (sno,cno)
+) ;
+
+insert into sc(sno, cno, grade)
+ values('200215121','1',92);
+
+insert into sc(sno, cno, grade)
+ values('200215121','2',85);
+
+insert into sc(sno, cno, grade)
+ values('200215121','3',88);
+
+insert into sc(sno, cno, grade)
+values('200215122','2',90);
+
+insert into sc(sno, cno, grade)
+ values('200215122','3',80);
+
+
+
+
+
+
+

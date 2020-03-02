@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <script src="https://cdn.staticfile.org/vue/2.4.2/vue.min.js"></script>
+    <script src="https://cdn.staticfile.org/vue-resource/1.5.1/vue-resource.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.staticfile.org/twitter-bootstrap/4.1.0/css/bootstrap.min.css">
+    <title></title>
+</head>
+
+<body>
+    <div id="app" class="container">
+        <table class="table table-bordered table-striped text-center" style="margin-top:20px;">
+            <thead>
+                <tr>
+                    <th>课程号</th>
+                    <th>课程名</th>
+                    <th>cpno</th>
+                    <th>学分</th>
+                    <th colspan="2">操作</th>
+                </tr>
+            </thead>
+            <tr>
+                <td><input v-bind:readOnly="isedit" type="text" v-model="rowtp.cno" class="form-control" placeholder="">
+                </td>
+                <td><input type="text" v-model="rowtp.cname" class="form-control" placeholder=""></td>
+                <td><input type="text" v-model="rowtp.cpno" class="form-control" placeholder=""></td>
+                <td><input type="text" v-model="rowtp.ccredit" class="form-control" placeholder=""></td>
+            
+                <td><button type="button" class="btn btn-primary" v-on:click="Save">保存</button></td>
+                <td><button type="button" class="btn btn-primary" v-on:click="Clear">放弃</button></td>
+            </tr>
+            <tr v-for="(row,index) in courses">
+
+                <td>{{ row.cno}}</td>
+                <td>{{ row.cname}}</td>
+                <td>{{ row.cpno}}</td>
+                <td>{{ row.ccredit}}</td>
+                <td><a href="#" v-on:click="Edit(row)">编辑</a> </td>
+                <td><a href="#" v-on:click="Delete(index)">删除</a> </td>
+            </tr>
+
+        </table>
+
+    </div>
+
+    <script>
+        new Vue({
+            el: "#app",
+            data: {
+                courses: [],
+                rowtp: { cno: '', cname: '', cpno: '', ccredit: ''},
+                isedit: false
+            },
+            mounted: function () {
+                //发送get请求
+                this.$http.get('http://localhost:8080/sc/courses').then(function (res) {
+                    this.courses = res.body;
+                }, function () {
+                    alert('请求失败');
+                });
+            },
+            methods: {
+                Save: function () {
+                    if (this.rowtp.cno == '' || this.rowtp.cname == '') {
+                        alert("课程号、课程名不能为空!");
+                        return;
+                    }
+
+                    var temp = this.rowtp;
+
+                    //var ejson = JSON.stringify(temp);
+
+                    if (this.isedit == false) {
+                        //增加数据库
+                        //Vue.http.options.emulateJSON = true;  //  全局启用emulateJSON 选项
+                        this.$http.post('http://localhost:8080/sc/course',JSON.stringify(temp)).then(function (res) {
+                            //console.log(res);
+                            if (res.body.rows > 0) {
+                                this.courses.push(temp);
+                            }
+                        }, function (res) {
+                            // 这里是处理错误的回调
+                            //console.log(res)
+                        });
+
+                    } else {
+                        //修改数据库
+                        this.$http.put('http://localhost:8080/sc/course',JSON.stringify(temp)).then(function (res) {
+                            //console.log(res);
+                            if (res.body.rows > 0) {
+                                for (var i = 0; i < this.courses.length; i++) {
+                                    if (this.courses[i].cno == temp.cno) {
+                                        this.courses[i].cname = temp.cname;
+                                        this.courses[i].cpno = temp.cpno;
+                                        this.courses[i].ccredit = temp.ccredit;
+                                        break;
+                                    }
+                                };
+                            }
+                        }, function (res) {
+                            // 这里是处理错误的回调
+                            console.log(res)
+                        });
+
+                    }
+                    //还原模板
+                    this.Clear();
+                    this.isedit = false;
+                },
+                Delete: function (index) {
+                    //数据库操作
+
+                    this.$http.delete('http://localhost:8080/sc/course/' + this.courses[index].cno ).then(function (res) {
+                        if (res.body.rows > 0) {
+                            this.courses.splice(index, 1);//从下标i开始删除1个元素：删除下标为i的元素
+                            this.Clear();
+                        }
+                    }, function (res) {
+                        // 这里是处理错误的回调
+                        console.log(res)
+                    });
+                },
+                Edit: function (row) {
+                    this.rowtp.cno = row.cno;
+                    this.rowtp.cname = row.cname;
+                    this.rowtp.cpno = row.cpno;
+                    this.rowtp.ccredit = row.ccredit;
+
+                    this.isedit = true;
+                },
+                Clear: function () {
+                    this.rowtp = { cno: '', cname: '', cpno: '', ccredit: '' };
+                    this.isedit = false;
+                }
+
+            }
+        });
+       
+    </script>
+</body>
+
+</html>
